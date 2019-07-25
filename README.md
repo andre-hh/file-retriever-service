@@ -18,3 +18,4 @@ Run tests with `php vendor/phpunit/phpunit/phpunit --bootstrap vendor/autoload.p
 ## TODO
 
  - Increase test coverage
+ - Perhaps add `curl_setopt($ch, CURLOPT_PROGRESSFUNCTION, [$this, 'logDownloadProgress']);`

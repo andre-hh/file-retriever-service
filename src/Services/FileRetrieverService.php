@@ -28,7 +28,7 @@ class FileRetrieverService
      * @throws FileRetrievalFailedException
      * @throws Exception
      */
-    public function getFileContents(
+    public function retrieveFile(
         string $url,
         string $localPath,
         string $inputFileEncoding = FileEncoding::ENCODING_UTF_8,
@@ -63,7 +63,7 @@ class FileRetrieverService
      * @throws FileRetrievalFailedException
      * @throws Exception
      */
-    public function getRawFileContents(
+    protected function getRawFileContents(
         string $fileUrl,
         int $maxAttempts = 3,
         int $waitSecondsMultipliedWithAttemptAfterFailure = 5
