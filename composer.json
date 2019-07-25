@@ -1,6 +1,12 @@
 {
     "name": "andre-hh/file-retriever-service",
     "description": "A PHP service to retrieve file contents.",
+    "authors": [
+        {
+            "name": "André Kolell",
+            "email": "andre.kolell@gmail.de"
+        }
+    ],
     "homepage": "https://github.com/andre-hh/file-retriever-service",
     "support": {
         "issues": "https://github.com/andre-hh/file-retriever-service/issues",
