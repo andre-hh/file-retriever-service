@@ -30,13 +30,17 @@ class FileRetrieverService
      */
     public function retrieveFile(
         string $url,
-        string $localPath,
+        string $localPath = null,
         string $inputFileEncoding = FileEncoding::ENCODING_UTF_8,
         int $attempts = 3,
         int $waitSecondsMultipliedWithAttemptAfterFailure = 5
     ): RetrievedFile
     {
         $this->logger->debug('Will copy file from ' . $url . ' to local disk now.');
+
+        if (!$localPath) {
+            $localPath = (string) microtime(true);
+        }
 
         list($contents, $lastModifiedAt) =
             $this->getRawFileContents($url, $attempts, $waitSecondsMultipliedWithAttemptAfterFailure);
