@@ -21,6 +21,7 @@ class FileRetrieverService
     {
         $this->logger = $logger;
     }
+
     /**
      * Copies the file from the specified URI to the specified local path.
      * Converts the file's contents to UTF-8.

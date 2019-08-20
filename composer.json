@@ -14,7 +14,9 @@
     },
     "require": {
         "php": ">=7.3,<8",
+        "ext-curl": "*",
         "ext-mbstring": "*",
+        "ext-zip": "*",
         "psr/log": "^1.0"
     },
     "require-dev": {
