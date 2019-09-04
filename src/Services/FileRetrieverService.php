@@ -34,7 +34,8 @@ class FileRetrieverService
         string $localPath = null,
         string $inputFileEncoding = FileEncoding::ENCODING_UTF_8,
         int $attempts = 3,
-        int $waitSecondsMultipliedWithAttemptAfterFailure = 5
+        int $waitSecondsMultipliedWithAttemptAfterFailure = 5,
+        int $curlRequestTimeoutSeconds = 300
     ): RetrievedFile
     {
         $this->logger->debug('Will copy file from ' . $url . ' to local disk now.');
@@ -43,8 +44,12 @@ class FileRetrieverService
             $localPath = (string) microtime(true);
         }
 
-        list($contents, $lastModifiedAt) =
-            $this->getRawFileContents($url, $attempts, $waitSecondsMultipliedWithAttemptAfterFailure);
+        list($contents, $lastModifiedAt) = $this->getRawFileContents(
+            $url,
+            $attempts,
+            $waitSecondsMultipliedWithAttemptAfterFailure,
+            $curlRequestTimeoutSeconds
+        );
 
         $contents = self::gzdecodeFileContentsIfNecessary($url, $contents);
         $contents = self::unzipFileContentsIfNecessary($url, $contents, $localPath);
@@ -71,7 +76,8 @@ class FileRetrieverService
     protected function getRawFileContents(
         string $fileUrl,
         int $maxAttempts = 3,
-        int $waitSecondsMultipliedWithAttemptAfterFailure = 5
+        int $waitSecondsMultipliedWithAttemptAfterFailure = 5,
+        int $curlRequestTimeoutSeconds = 300
     ): array
     {
         $attempt = 0;
@@ -84,7 +90,7 @@ class FileRetrieverService
                 $ch = curl_init();
                 curl_setopt($ch, CURLOPT_URL, $fileUrl);
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_TIMEOUT, 300);     // Big files might take some time!
+                curl_setopt($ch, CURLOPT_TIMEOUT, $curlRequestTimeoutSeconds); // Big files might take some time!
                 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
                 curl_setopt($ch, CURLOPT_ENCODING, 'gzip');
 
