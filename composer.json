@@ -14,7 +14,10 @@
     },
     "require": {
         "php": ">=7.3,<8",
+        "ext-curl": "*",
         "ext-mbstring": "*",
+        "ext-zip": "*",
+        "ext-zlib": "*",
         "psr/log": "^1.0"
     },
     "require-dev": {
