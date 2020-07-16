@@ -44,15 +44,15 @@ class FileRetrieverService
             $localPath = (string) microtime(true);
         }
 
-        list($contents, $lastModifiedAt) = $this->getRawFileContents(
+        [$contents, $lastModifiedAt] = $this->getRawFileContents(
             $url,
             $attempts,
             $waitSecondsMultipliedWithAttemptAfterFailure,
             $curlRequestTimeoutSeconds
         );
 
-        $contents = self::gzdecodeFileContentsIfNecessary($url, $contents);
-        $contents = self::unzipFileContentsIfNecessary($url, $contents, $localPath);
+        $contents = $this->gzdecodeFileContentsIfNecessary($url, $contents);
+        $contents = $this->unzipFileContentsIfNecessary($url, $contents, $localPath);
 
         if ($inputFileEncoding !== FileEncoding::ENCODING_UTF_8) {
             $contents = mb_convert_encoding($contents, FileEncoding::ENCODING_UTF_8, $inputFileEncoding);
@@ -104,14 +104,15 @@ class FileRetrieverService
 
                 $contents = curl_exec($ch);
 
-                if (curl_getinfo($ch, CURLINFO_RESPONSE_CODE) === 404) {
+                $responseCode = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+                if (in_array($responseCode, [403, 404,], false)) {
                     throw new FileRetrievalFailedException(
                         $fileUrl,
-                        'Got 404 when retrieving file contents.'
+                        'Got ' . $responseCode . ' when retrieving file contents.'
                     );
                 }
 
-                if (!is_string($contents) || strlen($contents) < 1) {
+                if (!is_string($contents) || $contents === '') {
                     throw new FileRetrievalFailedException(
                         $fileUrl,
                         'Got empty file when retrieving file contents.'
