@@ -138,16 +138,17 @@ class FileRetrieverService
 
             } catch (FileRetrievalFailedException $e) {
 
-                // We don't log directly to avoid too much noise
-                if ($attempt > 1) {
-                    $this->logger->warning(
-                        $e->getMessage(),
-                        [
-                            'attempt' => $attempt,
-                            'fileUrl' => $e->getFileUrl(),
-                            'additionalData' => $e->getAdditionalData(),
-                        ]
-                    );
+                $context = [
+                    'attempt' => $attempt,
+                    'fileUrl' => $e->getFileUrl(),
+                    'additionalData' => $e->getAdditionalData(),
+                ];
+
+                // We use different log levels to avoid too much noise
+                if ($attempt === 1) {
+                    $this->logger->info($e->getMessage(), $context);
+                } else {
+                    $this->logger->warning($e->getMessage(), $context);
                 }
 
                 if ($attempt === $maxAttempts) {
