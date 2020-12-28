@@ -4,14 +4,13 @@ declare(strict_types=1);
 namespace Tests;
 
 use Exception;
-use FileRetrieverService\FileRetrieverService;
+use FileRetrieverService\Services\FileRetrieverService;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\Test\TestLogger;
 
 final class FileRetrieverServiceTest extends TestCase
 {
-    /** @var FileRetrieverService */
-    private $fileRetrieverService;
+    private FileRetrieverService $fileRetrieverService;
 
     public function setUp(): void
     {
@@ -23,10 +22,10 @@ final class FileRetrieverServiceTest extends TestCase
     /**
      * @throws Exception
      */
-    public function testUnzipFileContentsIfNecessary()
+    public function testUnzipFileContentsIfNecessary(): void
     {
         // A file that is pure text and not ending in .zip should not be unzipped
-        $this->assertEquals(
+        self::assertEquals(
             'some content',
             $this->fileRetrieverService->unzipFileContentsIfNecessary(
                 'http://www.example.com/sample.tsv',
@@ -36,7 +35,7 @@ final class FileRetrieverServiceTest extends TestCase
         );
 
         // A file that is pure text but ending in .zip should not be unzipped
-        $this->assertEquals(
+        self::assertEquals(
             'some content',
             $this->fileRetrieverService->unzipFileContentsIfNecessary(
                 'http://www.example.com/sample.tsv.zip',
@@ -46,7 +45,7 @@ final class FileRetrieverServiceTest extends TestCase
         );
 
         // A file that is zipped and ending in .zip should be unzipped
-        $this->assertEquals(
+        self::assertEquals(
             'some zipped content',
             $this->fileRetrieverService->unzipFileContentsIfNecessary(
                 'http://www.example.com/file.tsv.zip',
@@ -59,10 +58,10 @@ final class FileRetrieverServiceTest extends TestCase
         // TODO: Test with a file that is gzipped but ending in .zip (we won't detect this yet)
     }
 
-    public function testGzdecodeFileContentsIfNecessary()
+    public function testGzdecodeFileContentsIfNecessary(): void
     {
         // A file that is pure text and not ending in .gz should not be gzdecoded
-        $this->assertEquals(
+        self::assertEquals(
             'some content',
             $this->fileRetrieverService->gzdecodeFileContentsIfNecessary(
                 'http://www.example.com/sample.tsv',
@@ -71,7 +70,7 @@ final class FileRetrieverServiceTest extends TestCase
         );
 
         // A file that is pure text but ending in .gz should not be gzdecoded
-        $this->assertEquals(
+        self::assertEquals(
             'some content',
             $this->fileRetrieverService->gzdecodeFileContentsIfNecessary(
                 'http://www.example.com/sample.tsv.gz',

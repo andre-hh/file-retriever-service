@@ -5,8 +5,8 @@ namespace FileRetrieverService;
 
 abstract class FileEncoding
 {
-    const ENCODING_UTF_8 = 'UTF-8';
-    const ENCODING_WINDOWS_1252 = 'Windows-1252';
+    public const ENCODING_UTF_8 = 'UTF-8';
+    public const ENCODING_WINDOWS_1252 = 'Windows-1252';
 
     /**
      * @return array<string>

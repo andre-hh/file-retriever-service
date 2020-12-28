@@ -1,25 +1,23 @@
 <?php
 declare(strict_types=1);
 
-namespace FileRetrieverService;
+namespace FileRetrieverService\Services;
 
 use DateTime;
 use Exception;
-use FileRetrievalService\Exceptions\FileRetrievalFailedException;
+use FileRetrieverService\Exceptions\FileRetrievalFailedException;
+use FileRetrieverService\FileEncoding;
 use FileRetrieverService\Models\RetrievedFile;
 use Psr\Log\LoggerInterface;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use RuntimeException;
 use ZipArchive;
 
 class FileRetrieverService
 {
-    /** @var LoggerInterface */
-    protected $logger;
-
-    public function __construct(LoggerInterface $logger)
+    public function __construct(protected LoggerInterface $logger)
     {
-        $this->logger = $logger;
     }
 
     /**
@@ -31,7 +29,7 @@ class FileRetrieverService
      */
     public function retrieveFile(
         string $url,
-        string $localPath = null,
+        ?string $localPath = null,
         string $inputFileEncoding = FileEncoding::ENCODING_UTF_8,
         int $attempts = 3,
         int $waitSecondsMultipliedWithAttemptAfterFailure = 5,
@@ -112,19 +110,19 @@ class FileRetrieverService
                     );
                 }
 
-                if (!is_string($contents) || $contents === '') {
-                    throw new FileRetrievalFailedException(
-                        $fileUrl,
-                        'Got empty file when retrieving file contents.'
-                    );
-                }
-
                 $error = curl_errno($ch);
                 if ($error > 0) {
                     throw new FileRetrievalFailedException(
                         $fileUrl,
                         'Got CURL error when retrieving file contents.',
                         ['curlErrorCode' => $error, 'curlErrorMessage' => curl_error($ch),]
+                    );
+                }
+
+                if (!is_string($contents) || $contents === '') {
+                    throw new FileRetrievalFailedException(
+                        $fileUrl,
+                        'Got empty file when retrieving file contents.'
                     );
                 }
 
@@ -176,14 +174,19 @@ class FileRetrieverService
 
             file_put_contents($localPath . '-zipped', $contents);
 
-            if (is_resource($zip = zip_open($localPath . '-zipped'))) {
-                zip_close($zip);
+            $zipArchive = new ZipArchive();
+            $resource = $zipArchive->open($localPath . '-zipped');
+
+            if ($resource !== true) {
+                $this->logger->info(
+                    'Skipped unzipping as the file is not a real zip file although ending in .zip.',
+                    ['errorCode' => $resource,]
+                );
+            } else {
 
                 // Unzip .zip file into directory
-                $zip = new ZipArchive;
-                $zip->open($localPath . '-zipped');
-                $zip->extractTo($localPath . '-unzipped');
-                $zip->close();
+                $zipArchive->extractTo($localPath . '-unzipped');
+                $zipArchive->close();
 
                 $filesInZipArchive = array_values(
                     array_filter(scandir($localPath . '-unzipped'), function($item) use ($localPath) {
@@ -193,7 +196,7 @@ class FileRetrieverService
 
                 // TODO: Improve exception and log message
                 if (count($filesInZipArchive) === 0) {
-                    throw new Exception('Zip archive is empty.');
+                    throw new RuntimeException('Zip archive is empty.');
                 } elseif (count($filesInZipArchive) > 1) {
                     $this->logger->warning('More than one file in zip archive.');
                 }
@@ -203,11 +206,6 @@ class FileRetrieverService
                 $contents = file_get_contents($localPath . '-unzipped/' . $filesInZipArchive[0]);
 
                 $this->deleteDirectoryTree($localPath . '-unzipped');
-
-            } else {
-                $this->logger->info(
-                    'Skipped unzipping as the file is not a real zip file although ending in .zip.'
-                );
             }
 
             unlink($localPath . '-zipped');

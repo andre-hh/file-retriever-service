@@ -1,0 +1,10 @@
+version: "3.4"
+
+services:
+    file-retriever-service-cli:
+        build:
+            context: .
+            dockerfile: .docker/Dockerfile
+        container_name: file-retriever-service-cli
+        volumes:
+            - .:/var/www/html:delegated

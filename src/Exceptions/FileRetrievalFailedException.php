@@ -1,21 +1,18 @@
 <?php
 declare(strict_types=1);
 
-namespace FileRetrievalService\Exceptions;
+namespace FileRetrieverService\Exceptions;
 
-class FileRetrievalFailedException extends \Exception
+use Exception;
+
+class FileRetrievalFailedException extends Exception
 {
-    /** @var string */
-    private $fileUrl;
-
-    /** @var array */
-    private $additionalData;
-
-    public function __construct(string $fileUrl, string $message, array $additionalData = [])
+    public function __construct(
+        protected string $fileUrl,
+        protected string $message,
+        protected array $additionalData = []
+    )
     {
-        $this->fileUrl = $fileUrl;
-        $this->additionalData = $additionalData;
-
         parent::__construct($message);
     }
 

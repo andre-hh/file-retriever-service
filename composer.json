@@ -13,15 +13,15 @@
         "source": "https://github.com/andre-hh/file-retriever-service"
     },
     "require": {
-        "php": ">=7.3,<8",
+        "php": "8.0",
         "ext-curl": "*",
         "ext-mbstring": "*",
         "ext-zip": "*",
         "ext-zlib": "*",
-        "psr/log": "^1.0"
+        "psr/log": "^1.1"
     },
     "require-dev": {
-        "phpunit/phpunit": "^8"
+        "phpunit/phpunit": "^9.5"
     },
     "autoload": {
         "classmap": [
