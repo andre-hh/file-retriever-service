@@ -12,7 +12,7 @@ Some features:
 
 ## Development
 
-Run tests with `php vendor/phpunit/phpunit/phpunit --bootstrap vendor/autoload.php tests`.
+Run tests with `make tests`.
 
 
 ## TODO

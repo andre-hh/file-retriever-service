@@ -7,29 +7,13 @@ use DateTime;
 
 class RetrievedFile
 {
-    /** @var string */
-    private $url;
-
-    /** @var string */
-    private $absoluteLocalPath;
-
-    /** @var DateTime|null */
-    private $lastModifiedAt;
-
-    /** @var int */
-    private $totalCharactersInFile;
-
     public function __construct(
-        string $url,
-        string $absoluteLocalPath,
-        ?DateTime $lastModifiedAt,
-        int $totalCharactersInFile
+        private string $url,
+        private string $absoluteLocalPath,
+        private ?DateTime $lastModifiedAt,
+        private int $totalCharactersInFile
     )
     {
-        $this->url = $url;
-        $this->absoluteLocalPath = $absoluteLocalPath;
-        $this->lastModifiedAt = $lastModifiedAt;
-        $this->totalCharactersInFile = $totalCharactersInFile;
     }
 
     public function getUrl(): string
