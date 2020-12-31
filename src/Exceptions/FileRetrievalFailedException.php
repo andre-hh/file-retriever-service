@@ -9,7 +9,7 @@ class FileRetrievalFailedException extends Exception
 {
     public function __construct(
         protected string $fileUrl,
-        protected string $message,
+        string $message, // Already defined in class Exception
         protected array $additionalData = []
     )
     {
