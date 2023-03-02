@@ -240,13 +240,14 @@ class FileRetrieverService
      *
      * @see https://gist.github.com/mindplay-dk/a4aad91f5a4f1283a5e2
      */
-    private function deleteDirectoryTree(string $folder): bool
+    private function deleteDirectoryTree(string $folder): void
     {
         // Handle bad arguments.
         if (empty($folder) || !file_exists($folder)) {
-            return true; // No such file/folder exists.
+            return; // No such file/folder exists.
         } elseif (is_file($folder) || is_link($folder)) {
-            return @unlink($folder);
+            @unlink($folder);
+            return;
         }
 
         // Delete all children.
@@ -258,10 +259,10 @@ class FileRetrieverService
         foreach ($files as $fileinfo) {
             $action = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
             if (!@$action($fileinfo->getRealPath())) {
-                return false; // Abort due to the failure.
+                return; // Abort due to the failure.
             }
         }
 
-        return @rmdir($folder);
+        @rmdir($folder);
     }
 }
