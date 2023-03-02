@@ -1,12 +1,13 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Tests;
 
+use ColinODell\PsrTestLogger\TestLogger;
 use Exception;
 use FileRetrieverService\Services\FileRetrieverService;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\Test\TestLogger;
 
 final class FileRetrieverServiceTest extends TestCase
 {

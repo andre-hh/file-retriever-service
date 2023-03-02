@@ -1,4 +1,4 @@
-FROM php:8.0-cli
+FROM php:8.2-cli
 
 # zip requires libzip-dev
 RUN apt-get -y update \
