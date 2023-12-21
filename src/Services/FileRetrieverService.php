@@ -102,20 +102,20 @@ class FileRetrieverService
 
                 $contents = curl_exec($ch);
 
-                $responseCode = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-                if (in_array($responseCode, [403, 404,], false)) {
-                    throw new FileRetrievalFailedException(
-                        $fileUrl,
-                        'Got ' . $responseCode . ' when retrieving file contents.'
-                    );
-                }
-
                 $error = curl_errno($ch);
                 if ($error > 0) {
                     throw new FileRetrievalFailedException(
                         $fileUrl,
                         'Got CURL error when retrieving file contents.',
                         ['curlErrorCode' => $error, 'curlErrorMessage' => curl_error($ch),]
+                    );
+                }
+
+                $responseCode = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+                if (in_array($responseCode, [403, 404,], false)) {
+                    throw new FileRetrievalFailedException(
+                        $fileUrl,
+                        'Got ' . $responseCode . ' when retrieving file contents.'
                     );
                 }
 
