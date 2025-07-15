@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace FileRetrieverService\Services;
@@ -34,12 +35,11 @@ class FileRetrieverService
         int $attempts = 3,
         int $waitSecondsMultipliedWithAttemptAfterFailure = 5,
         int $curlRequestTimeoutSeconds = 300
-    ): RetrievedFile
-    {
+    ): RetrievedFile {
         $this->logger->debug('Will copy file from ' . $url . ' to local disk now.');
 
         if (!$localPath) {
-            $localPath = (string) microtime(true);
+            $localPath = (string)microtime(true);
         }
 
         [$contents, $lastModifiedAt] = $this->getRawFileContents(
@@ -76,46 +76,20 @@ class FileRetrieverService
         int $maxAttempts = 3,
         int $waitSecondsMultipliedWithAttemptAfterFailure = 5,
         int $curlRequestTimeoutSeconds = 300
-    ): array
-    {
+    ): array {
         $attempt = 0;
 
         while (true) {
-
             $attempt++;
 
             try {
-                $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, $fileUrl);
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_TIMEOUT, $curlRequestTimeoutSeconds); // Big files might take some time!
-                curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-                curl_setopt($ch, CURLOPT_ENCODING, 'gzip');
+                if (($contents = @file_get_contents($fileUrl)) === false) {
+                    $error = error_get_last();
 
-                // If this is not reliable, we might try get_headers() as described here:
-                // http://stackoverflow.com/questions/845220/get-the-last-modified-date-of-a-remote-file
-                curl_setopt($ch, CURLOPT_FILETIME, true);
-
-                // This should avoid errors like "error #18: transfer closed with ... bytes remaining to read".
-                // @see https://stackoverflow.com/questions/1759956/curl-error-18-transfer-closed-with-outstanding-read-data-remaining
-                curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
-
-                $contents = curl_exec($ch);
-
-                $error = curl_errno($ch);
-                if ($error > 0) {
                     throw new FileRetrievalFailedException(
                         $fileUrl,
-                        'Got CURL error when retrieving file contents.',
-                        ['curlErrorCode' => $error, 'curlErrorMessage' => curl_error($ch),]
-                    );
-                }
-
-                $responseCode = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-                if (in_array($responseCode, [403, 404,], false)) {
-                    throw new FileRetrievalFailedException(
-                        $fileUrl,
-                        'Got ' . $responseCode . ' when retrieving file contents.'
+                        'Failed to retrieve file contents using file_get_contents: ' . $error['message'],
+                        ['errorCode' => $error['type'],]
                     );
                 }
 
@@ -127,15 +101,13 @@ class FileRetrieverService
                 }
 
                 // See comment above...
-                $timestamp = curl_getinfo($ch, CURLINFO_FILETIME);  // Timestamps are always UTC
+                $fh = fopen($fileUrl, 'r');
+                $fstat = fstat($fh);
+                $timestamp = $fstat['mtime'] ?? -1;  // Timestamps are always UTC
                 $lastModifiedAt = ($timestamp !== -1) ? new DateTime('@' . $timestamp) : null;
 
-                curl_close($ch);
-
                 return [$contents, $lastModifiedAt,];
-
             } catch (FileRetrievalFailedException $e) {
-
                 $context = [
                     'attempt' => $attempt,
                     'fileUrl' => $e->getFileUrl(),
@@ -169,7 +141,6 @@ class FileRetrieverService
     public function unzipFileContentsIfNecessary(string $url, string $contents, string $localPath): string
     {
         if (substr_compare($url, '.zip', strlen($url) - strlen('.zip'), strlen('.zip')) === 0) {
-
             $this->logger->debug('Got a file ending in .zip. Trying to unzip.');
 
             file_put_contents($localPath . '-zipped', $contents);
@@ -183,13 +154,12 @@ class FileRetrieverService
                     ['errorCode' => $resource,]
                 );
             } else {
-
                 // Unzip .zip file into directory
                 $zipArchive->extractTo($localPath . '-unzipped');
                 $zipArchive->close();
 
                 $filesInZipArchive = array_values(
-                    array_filter(scandir($localPath . '-unzipped'), function($item) use ($localPath) {
+                    array_filter(scandir($localPath . '-unzipped'), function ($item) use ($localPath) {
                         return !is_dir($localPath . '-unzipped/' . $item);
                     })
                 );
@@ -218,7 +188,6 @@ class FileRetrieverService
     {
         // gzdecode if file ends with .gz
         if (substr_compare($url, '.gz', strlen($url) - strlen('.gz'), strlen('.gz')) === 0) {
-
             $this->logger->debug('Got a file ending in .gz. Trying to gzdecode.');
 
             $isGzip = (0 === mb_strpos($contents, "\x1f" . "\x8b" . "\x08", 0, 'US-ASCII'));
