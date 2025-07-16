@@ -1,18 +1,18 @@
 <?php
+
 declare(strict_types=1);
 
 namespace FileRetrieverService\Exceptions;
 
 use Exception;
 
-class FileRetrievalFailedException extends Exception
+class FileRetrievalFailedException extends \Exception
 {
     public function __construct(
         protected string $fileUrl,
         string $message, // Already defined in class Exception
-        protected array $additionalData = []
-    )
-    {
+        protected array $additionalData = [],
+    ) {
         parent::__construct($message);
     }
 

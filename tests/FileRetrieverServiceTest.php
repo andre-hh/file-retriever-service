@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Tests;
 
 use ColinODell\PsrTestLogger\TestLogger;
-use Exception;
 use FileRetrieverService\Services\FileRetrieverService;
 use PHPUnit\Framework\TestCase;
 
@@ -21,7 +20,7 @@ final class FileRetrieverServiceTest extends TestCase
     }
 
     /**
-     * @throws Exception
+     * @throws \Exception
      */
     public function testUnzipFileContentsIfNecessary(): void
     {
@@ -31,7 +30,7 @@ final class FileRetrieverServiceTest extends TestCase
             $this->fileRetrieverService->unzipFileContentsIfNecessary(
                 'http://www.example.com/sample.tsv',
                 'some content',
-                'tmp_' . microtime(true)
+                'tmp_'.microtime(true)
             )
         );
 
@@ -41,7 +40,7 @@ final class FileRetrieverServiceTest extends TestCase
             $this->fileRetrieverService->unzipFileContentsIfNecessary(
                 'http://www.example.com/sample.tsv.zip',
                 'some content',
-                'tmp_' . microtime(true)
+                'tmp_'.microtime(true)
             )
         );
 
@@ -51,7 +50,7 @@ final class FileRetrieverServiceTest extends TestCase
             $this->fileRetrieverService->unzipFileContentsIfNecessary(
                 'http://www.example.com/file.tsv.zip',
                 file_get_contents('tests/file.tsv.zip'),
-                'tmp_' . microtime(true)
+                'tmp_'.microtime(true)
             )
         );
 

@@ -1,19 +1,17 @@
 <?php
+
 declare(strict_types=1);
 
 namespace FileRetrieverService\Models;
-
-use DateTime;
 
 class RetrievedFile
 {
     public function __construct(
         private string $url,
         private string $absoluteLocalPath,
-        private ?DateTime $lastModifiedAt,
-        private int $totalCharactersInFile
-    )
-    {
+        private ?\DateTime $lastModifiedAt,
+        private int $totalCharactersInFile,
+    ) {
     }
 
     public function getUrl(): string
@@ -26,7 +24,7 @@ class RetrievedFile
         return $this->absoluteLocalPath;
     }
 
-    public function getLastModifiedAt(): ?DateTime
+    public function getLastModifiedAt(): ?\DateTime
     {
         return $this->lastModifiedAt;
     }
