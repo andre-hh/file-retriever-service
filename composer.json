@@ -18,11 +18,13 @@
         "ext-mbstring": "*",
         "ext-zip": "*",
         "ext-zlib": "*",
-        "psr/log": "^3.0"
+        "psr/log": "^3.0",
+        "phpseclib/phpseclib": "^3.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^10.0",
-        "colinodell/psr-testlogger": "^1.1"
+        "colinodell/psr-testlogger": "^1.1",
+        "laravel/pint": "^1.24"
     },
     "autoload": {
         "classmap": [
