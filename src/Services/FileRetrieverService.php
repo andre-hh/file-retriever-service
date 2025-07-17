@@ -73,45 +73,45 @@ class FileRetrieverService
         int $waitSecondsMultipliedWithAttemptAfterFailure = 5,
         int $curlRequestTimeoutSeconds = 300,
     ): array {
-        $components = parse_url($fileUrl);
+        $attempt = 0;
 
-        if (isset($components['scheme']) && 'sftp' === $components['scheme']) {
-            if (!isset($components['host'])) {
-                throw new FileRetrievalFailedException($fileUrl, 'SFTP URL must contain a host.');
-            }
+        while (true) {
+            ++$attempt;
 
-            $client = new SFTP($components['host'], $components['port'] ?? 22);
+            try {
+                $components = parse_url($fileUrl);
 
-            if (!isset($components['user']) || !isset($components['pass'])) {
-                throw new FileRetrievalFailedException($fileUrl, 'SFTP URL must contain credentials.');
-            }
+                if (isset($components['scheme']) && 'sftp' === $components['scheme']) {
+                    if (!isset($components['host'])) {
+                        throw new FileRetrievalFailedException($fileUrl, 'SFTP URL must contain a host.');
+                    }
 
-            if (!$client->login($components['user'], $components['pass'])) {
-                throw new FileRetrievalFailedException($fileUrl, 'Failed to login to SFTP server.');
-            }
+                    $client = new SFTP($components['host'], $components['port'] ?? 22);
 
-            $path = $components['path'] ?? '';
+                    if (!isset($components['user']) || !isset($components['pass'])) {
+                        throw new FileRetrievalFailedException($fileUrl, 'SFTP URL must contain credentials.');
+                    }
 
-            $contents = $client->get($path);
+                    if (!$client->login($components['user'], $components['pass'])) {
+                        throw new FileRetrievalFailedException($fileUrl, 'Failed to login to SFTP server.');
+                    }
 
-            if (!is_string($contents) || '' === $contents) {
-                throw new FileRetrievalFailedException($fileUrl, 'Got empty file when retrieving file contents.');
-            }
+                    $path = $components['path'] ?? '';
 
-            $timestamp = $client->filemtime($path);  // Timestamps are always UTC
-            $lastModifiedAt = (-1 !== $timestamp) ? new \DateTime('@'.$timestamp) : null;
+                    $contents = $client->get($path);
 
-            return [
-                $contents,
-                $lastModifiedAt,
-            ];
-        } else {
-            $attempt = 0;
+                    if (!is_string($contents) || '' === $contents) {
+                        throw new FileRetrievalFailedException($fileUrl, 'Got empty file when retrieving file contents.');
+                    }
 
-            while (true) {
-                ++$attempt;
+                    $timestamp = $client->filemtime($path);  // Timestamps are always UTC
+                    $lastModifiedAt = (-1 !== $timestamp) ? new \DateTime('@'.$timestamp) : null;
 
-                try {
+                    return [
+                        $contents,
+                        $lastModifiedAt,
+                    ];
+                } else {
                     $ch = curl_init();
                     curl_setopt($ch, CURLOPT_URL, $fileUrl);
                     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -153,25 +153,25 @@ class FileRetrieverService
                         $contents,
                         $lastModifiedAt,
                     ];
-                } catch (FileRetrievalFailedException $e) {
-                    $context = [
-                        'attempt' => $attempt,
-                        'fileUrl' => $e->getFileUrl(),
-                        'additionalData' => $e->getAdditionalData(),
-                    ];
+                }
+            } catch (FileRetrievalFailedException|\Exception $e) {
+                $context = [
+                    'attempt' => $attempt,
+                    'fileUrl' => $e->getFileUrl(),
+                    'additionalData' => $e->getAdditionalData(),
+                ];
 
-                    // We use different log levels to avoid too much noise
-                    if (1 === $attempt) {
-                        $this->logger->info($e->getMessage(), $context);
-                    } else {
-                        $this->logger->warning($e->getMessage(), $context);
-                    }
+                // We use different log levels to avoid too much noise
+                if (1 === $attempt) {
+                    $this->logger->info($e->getMessage(), $context);
+                } else {
+                    $this->logger->warning($e->getMessage(), $context);
+                }
 
-                    if ($attempt === $maxAttempts) {
-                        throw $e;
-                    } else {
-                        sleep($attempt * $waitSecondsMultipliedWithAttemptAfterFailure);
-                    }
+                if ($attempt === $maxAttempts) {
+                    throw $e;
+                } else {
+                    sleep($attempt * $waitSecondsMultipliedWithAttemptAfterFailure);
                 }
             }
         }
