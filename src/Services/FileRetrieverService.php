@@ -86,7 +86,7 @@ class FileRetrieverService
                         throw new FileRetrievalFailedException($fileUrl, 'SFTP URL must contain a host.');
                     }
 
-                    $client = new SFTP($components['host'], $components['port'] ?? 22);
+                    $client = new SFTP($components['host'], $components['port'] ?? 22, 180);
 
                     if (!isset($components['user']) || !isset($components['pass'])) {
                         throw new FileRetrievalFailedException($fileUrl, 'SFTP URL must contain credentials.');
