@@ -125,7 +125,8 @@ class FileRetrieverService
 
                     // This should avoid errors like "error #18: transfer closed with ... bytes remaining to read".
                     // @see https://stackoverflow.com/questions/1759956/curl-error-18-transfer-closed-with-outstanding-read-data-remaining
-                    curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+                    // 14.08.25: Removed this, as otherwise "OpenSSL/3.0.16: error:0A00006E:SSL routines::bad extension" might happen
+//                curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
 
                     $contents = curl_exec($ch);
 
