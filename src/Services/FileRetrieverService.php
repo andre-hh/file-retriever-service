@@ -123,6 +123,10 @@ class FileRetrieverService
                     // http://stackoverflow.com/questions/845220/get-the-last-modified-date-of-a-remote-file
                     curl_setopt($ch, CURLOPT_FILETIME, true);
 
+                    // 01.09.25: Required by some servers for retrieving files
+                    // TODO: Allow injection
+                    curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (compatible; PHP cURL)');
+
                     // This should avoid errors like "error #18: transfer closed with ... bytes remaining to read".
                     // @see https://stackoverflow.com/questions/1759956/curl-error-18-transfer-closed-with-outstanding-read-data-remaining
                     // 14.08.25: Removed this, as otherwise "OpenSSL/3.0.16: error:0A00006E:SSL routines::bad extension" might happen
