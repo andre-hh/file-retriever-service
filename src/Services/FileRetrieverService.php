@@ -159,7 +159,13 @@ class FileRetrieverService
                         $lastModifiedAt,
                     ];
                 }
-            } catch (FileRetrievalFailedException|\Exception $e) {
+            } catch (\Exception $e) {
+                // Normalize foreign exceptions (e.g. phpseclib's UnableToConnectException), as only
+                // FileRetrievalFailedException provides getFileUrl() and getAdditionalData()
+                if (!$e instanceof FileRetrievalFailedException) {
+                    $e = new FileRetrievalFailedException($fileUrl, $e->getMessage(), ['originalException' => $e::class], $e);
+                }
+
                 $context = [
                     'attempt' => $attempt,
                     'fileUrl' => $e->getFileUrl(),

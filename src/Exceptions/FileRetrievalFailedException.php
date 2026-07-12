@@ -12,8 +12,9 @@ class FileRetrievalFailedException extends \Exception
         protected string $fileUrl,
         string $message, // Already defined in class Exception
         protected array $additionalData = [],
+        ?\Throwable $previous = null,
     ) {
-        parent::__construct($message);
+        parent::__construct($message, 0, $previous);
     }
 
     public function getFileUrl(): string

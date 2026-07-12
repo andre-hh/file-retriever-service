@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Tests;
 
 use ColinODell\PsrTestLogger\TestLogger;
+use FileRetrieverService\Exceptions\FileRetrievalFailedException;
 use FileRetrieverService\Services\FileRetrieverService;
+use phpseclib3\Exception\UnableToConnectException;
 use PHPUnit\Framework\TestCase;
 
 final class FileRetrieverServiceTest extends TestCase
@@ -89,5 +91,25 @@ final class FileRetrieverServiceTest extends TestCase
 
         // TODO: Test with a file that is zipped but not ending in .zip (we won't detect this yet)
         // TODO: Test with a file that is gzipped but ending in .zip (we won't detect this yet)
+    }
+
+    public function testRetrieveFileWrapsForeignExceptionsIntoFileRetrievalFailedException(): void
+    {
+        try {
+            // Port 1 on localhost is closed, so phpseclib throws UnableToConnectException immediately
+            $this->fileRetrieverService->retrieveFile(
+                'sftp://user:pass@127.0.0.1:1/some-file.tsv',
+                'tmp_'.microtime(true),
+                'UTF-8',
+                1,
+                0,
+            );
+
+            self::fail('Expected FileRetrievalFailedException to be thrown.');
+        } catch (FileRetrievalFailedException $e) {
+            self::assertSame('sftp://user:pass@127.0.0.1:1/some-file.tsv', $e->getFileUrl());
+            self::assertSame(UnableToConnectException::class, $e->getAdditionalData()['originalException']);
+            self::assertInstanceOf(UnableToConnectException::class, $e->getPrevious());
+        }
     }
 }
